@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>cube.png</file>
+        <file>heightMap.pgm</file>
+        <file>heightMap2.pgm</file>
+        <file>paletteAltitue.png</file>
+        <file>NormalMap.png</file>
+        <file>petiteMaison1.pgm</file>
+        <file>mapDebris.pgm</file>
+        <file>heigtMapBatiment.pgm</file>
+    </qresource>
+</RCC>
