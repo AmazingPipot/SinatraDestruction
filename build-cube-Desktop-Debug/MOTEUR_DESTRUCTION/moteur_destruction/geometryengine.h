@@ -90,6 +90,9 @@ public:
 
     float Scale;
     float tailleMap;
+    float RatioX;
+    float RatioY;
+    float RatioZ;
 
 
 

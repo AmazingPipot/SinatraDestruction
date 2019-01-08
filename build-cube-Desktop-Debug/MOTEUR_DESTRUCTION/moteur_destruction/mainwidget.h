@@ -142,6 +142,8 @@ private:
     QList<Debris*> listDebrisChute;
     QList<int> listSuppressionDebris;
     Debris *debris;
+    QVector<Mesh*> newListDebris = QVector<Mesh*>();
+    QVector<Mesh*> newListDebrisSol = QVector<Mesh*>();
 
     QOpenGLTexture *texture;
 
@@ -157,7 +159,7 @@ private:
     float Z = -5.0;
     int aff = 1;
 
-    QVector<Mesh*> objTab;
+    QVector<Mesh*> objDestructible;
 
 };
 

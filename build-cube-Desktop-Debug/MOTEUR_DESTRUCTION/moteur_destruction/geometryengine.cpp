@@ -75,7 +75,10 @@ struct VertexData
 //! [0]
 GeometryEngine::GeometryEngine(float posX, float posY, float s)
     : indexBuf(QOpenGLBuffer::IndexBuffer),
-      tailleMap(20)
+      tailleMap(20),
+      RatioX(1),
+      RatioY(1),
+      RatioZ(1)
 {
     initializeOpenGLFunctions();
 
@@ -104,40 +107,34 @@ GeometryEngine::~GeometryEngine()
 //! [0]
 void GeometryEngine::initMaps(){
 
-    Carte.load("/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/heightmap-1.png");
-    CarteDebris.load("/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm");
-    CarteBatiment.load("/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/heigtMapBatiment.pgm");
+    Carte.load("/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/heightMap.pgm");
+    //Carte.load("/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/heightMap.pgm");
+    //CarteDebris.load("/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm");
+    CarteDebris.load("/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm");
+    //CarteBatiment.load("/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/heigtMapBatiment.pgm");
+    CarteBatiment.load("/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/heigtMapBatiment.pgm");
+
+    RatioX = CarteDebris.width() / tailleMap;//Carte.width();//*tailleMap;
+    RatioY = CarteDebris.height() / tailleMap;//Carte.height();//*tailleMap;
+    RatioZ = 255 * (RatioX+RatioY) / 2;//255 / tailleMap;//255/*(RatioX+RatioY)*/ / tailleMap;
+
+    fprintf(stderr,"info map %f %f %f \n",RatioX,RatioY,RatioZ);
 }
 
 void GeometryEngine::fusionDebrisMap(float x, float y, float w, float l, float h){
-    QString str = "/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
-    int p = CarteDebris.pixel(x*CarteDebris.width()/tailleMap,y*CarteDebris.width()/tailleMap);//qGray(CarteDebris.pixel(x*(CarteDebris.width()-1)/tailleMap,y*(CarteDebris.height()-1)/tailleMap))/128.0;
-    int pp = h;
+    //QString str = "/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
+    QString str = "/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
+    int p = positionAltitude(x,y);
+    int pp = p + h * RatioZ;
+    fprintf(stderr,"\n %d \n ",pp);
     int xx = x * CarteDebris.width()/tailleMap;
-    int yy = y * CarteDebris.width()/tailleMap;
+    int yy = y * CarteDebris.height()/tailleMap;
     //printf(" Pcouleur %d ",p);
-    for (int i = 0; i < w; i++){
-        for (int j = 0; j < w; j++){
-            CarteDebris.setPixelColor(xx+i,yy+j,qRgb(pp+p,pp+p,pp+p));
-
-            //CarteDebris.setPixelColor(xx+8,yy+8,qRgb(p,p,p));
-            //positionDebris.push_back(xx);
-            //positionDebris.push_back(yy);
-            //positionDebris.push_back(p);
+    for (int i = 0; i < w * RatioX; i++){
+        for (int j = 0; j < l * RatioY; j++){
+            CarteDebris.setPixelColor(xx+i,yy+j,qRgb(pp,pp,pp));
         }
     }
-    //CarteDebris.save(str,"pgm");
-    //CarteDebris.setPixelColor(xx,yy,qRgb(p,p,p));
-    /*CarteDebris.setPixelColor(xx+1,yy,qRgb(p,p,p));
-    CarteDebris.setPixelColor(xx+1,yy+1,qRgb(p,p,p));
-    CarteDebris.setPixelColor(xx,yy+1,qRgb(p,p,p));
-    CarteDebris.setPixelColor(xx-1,yy+1,qRgb(p,p,p));
-    CarteDebris.setPixelColor(xx-1,yy,qRgb(p,p,p));
-    CarteDebris.setPixelColor(xx-1,yy-1,qRgb(p,p,p));
-    CarteDebris.setPixelColor(xx,yy-1,qRgb(p,p,p));*/
-
-    //printf("J'AI FUSIONNE 1 %d %d valeur pixel : %d ",xx,yy,qGray(CarteDebris.pixel(xx,yy)));
-    //printf("J'AI VAIS FUSIONNER 1 %d %d valeur pixel : %d ",xx,yy,CarteDebris.pixel(x*CarteDebris.width()/tailleMap,y*CarteDebris.width()/tailleMap));
 
 
     //CarteDebris.save(str,"pgm");
@@ -151,14 +148,17 @@ void GeometryEngine::reinitialiserMapDebris(){
             CarteDebris.setPixelColor(j,i,qRgb(0,0,0));
         }
     }
-    QString str = "/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
+    //QString str = "/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
+    QString str = "/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
     CarteDebris.save(str,"pgm");
 }
 QImage GeometryEngine::SauvegardeMapDebris(){
-    QString str = "/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
+    //QString str = "/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
+    QString str = "/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
     CarteDebris.save(str,"pgm");
-    CarteDebris.load("/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm");
-    fprintf(stderr," Sauvegarde de la map effectué ");
+    CarteDebris.load("/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm");
+    //fprintf(stderr," Sauvegarde de la map effectué ");
+    printf(" Sauvegarde de la map effectué ");
     return CarteDebris;
 }
 float GeometryEngine::positionAltitude(float x, float y){

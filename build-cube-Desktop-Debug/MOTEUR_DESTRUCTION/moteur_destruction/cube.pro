@@ -7,7 +7,8 @@ SOURCES += main.cpp \
     quadtree.cpp \
     debris.cpp \
     gestionbatiment.cpp \
-    immeuble.cpp
+    immeuble.cpp \
+    superstructure.cpp
 
 SOURCES += \
     mainwidget.cpp \
@@ -20,7 +21,8 @@ HEADERS += \
     debris.h \
     gestionbatiment.h \
     immeuble.h \
-    destructmesh.h
+    destructmesh.h \
+    superstructure.h
 
 RESOURCES += \
     shaders.qrc \
