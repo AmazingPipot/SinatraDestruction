@@ -79,7 +79,7 @@ public:
     void initMaps();
     float positionAltitude(float, float);
     void fusionDebrisMap(float, float, float, float, float);
-    QImage SauvegardeMapDebris();
+    void SauvegardeMapDebris();
     void reinitialiserMapDebris();
 
     QImage Carte;

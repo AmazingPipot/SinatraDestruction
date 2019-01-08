@@ -7,7 +7,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
 
-class SuperStructure
+class SuperStructure : protected QOpenGLFunctions
 {
 public:
     SuperStructure(float x, float y, float w, float h, float d, int type);
@@ -25,6 +25,7 @@ public:
     int typeStruct;
 
     void initStruct();
+    void DrawStructure(QOpenGLShaderProgram *program);
 
 private:
     QOpenGLBuffer arrayBuf;

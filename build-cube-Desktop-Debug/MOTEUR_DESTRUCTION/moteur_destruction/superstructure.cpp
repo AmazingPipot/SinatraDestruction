@@ -4,10 +4,98 @@ SuperStructure::SuperStructure(float x, float y, float w, float h, float d, int 
     :indexBuf(QOpenGLBuffer::IndexBuffer),
       X(x),
       Y(y),
+      Z(0),
       Width(w),
       Height(h),
       Depth(d),
       typeStruct(type)
 {
+    initStruct();
+}
 
+struct VertexData
+{
+    QVector3D position;
+    QVector2D texCoord;
+    QVector4D normal;
+
+};
+
+void SuperStructure::initStruct()
+{
+    VertexData* VD = (VertexData*) malloc(sizeof(VertexData)*24);
+
+    for (int i = 0; i < 24; i++){
+        VD[i].normal = QVector4D(0.0f, 0.0f, 0.0f,1.0f);
+    }
+
+    //////Face 1 Devant
+    VD[0]={QVector3D(X,Y,Z), QVector2D(0.0f, 0.0f)};
+    VD[1]={QVector3D(X+Width,Y,Z), QVector2D(0.0f, 0.0f)};
+    VD[2]={QVector3D(X+Width,Y+Height,Z), QVector2D(0.0f, 0.0f)};
+    VD[3]={QVector3D(X,Y+Height,Z), QVector2D(0.0f, 0.0f)};
+    //////Face Dessus
+    VD[4]={QVector3D(X,Y,Z), QVector2D(0.0f, 0.0f)};
+    VD[5]={QVector3D(X,Y,Z+Depth), QVector2D(0.0f, 0.0f)};
+    VD[6]={QVector3D(X+Width,Y,Z+Depth), QVector2D(0.0f, 0.0f)};
+    VD[7]={QVector3D(X+Width,Y,Z), QVector2D(0.0f, 0.0f)};
+    //////Face Derrière
+    VD[8]={QVector3D(X,Y,Z+Depth), QVector2D(0.0f, 0.0f)};
+    VD[9]={QVector3D(X,Y+Height,Z+Depth), QVector2D(0.0f, 0.0f)};
+    VD[10]={QVector3D(X+Width,Y+Height,Z+Depth), QVector2D(0.0f, 0.0f)};
+    VD[11]={QVector3D(X+Width,Y,Z+Depth), QVector2D(0.0f, 0.0f)};
+    //////Face Dessous
+    VD[12]={QVector3D(X,Y+Height,Z), QVector2D(0.0f, 0.0f)};
+    VD[13]={QVector3D(X+Width,Y+Height,Z), QVector2D(0.0f, 0.0f)};
+    VD[14]={QVector3D(X+Width,Y+Height,Z+Depth), QVector2D(0.0f, 0.0f)};
+    VD[15]={QVector3D(X,Y+Height,Z+Depth), QVector2D(0.0f, 0.0f)};
+    //////Face Gauche
+    VD[16]={QVector3D(X,Y,Z), QVector2D(0.0f, 0.0f)};
+    VD[17]={QVector3D(X,Y+Height,Z), QVector2D(0.0f, 0.0f)};
+    VD[18]={QVector3D(X,Y+Height,Z+Depth), QVector2D(0.0f, 0.0f)};
+    VD[19]={QVector3D(X,Y,Z+Depth), QVector2D(0.0f, 0.0f)};
+    //////Face Droite
+    VD[20]={QVector3D(X+Width,Y,Z), QVector2D(0.0f, 0.0f)};
+    VD[21]={QVector3D(X+Width,Y,Z+Depth), QVector2D(0.0f, 0.0f)};
+    VD[22]={QVector3D(X+Width,Y+Height,Z+Depth), QVector2D(0.0f, 0.0f)};
+    VD[23]={QVector3D(X+Width,Y+Height,Z), QVector2D(0.0f, 0.0f)};
+
+    GLushort indices[36];
+    for(int i=0,j=0;i<36;i+=6,j+=4){
+        indices[i] = j;
+        indices[i+1] = j+1;
+        indices[i+2] = j+2;
+        indices[i+3] = j+2;
+        indices[i+4] = j+3;
+        indices[i+5] = j;
+    }
+    arrayBuf.bind();
+    arrayBuf.allocate(VD,24*sizeof(VertexData));
+    indexBuf.bind();
+    indexBuf.allocate(indices,36*sizeof(GLushort));
+}
+
+void SuperStructure::DrawStructure(QOpenGLShaderProgram *program)
+{
+    arrayBuf.bind();
+    indexBuf.bind();
+
+    // Offset for position
+    quintptr offset = 0;
+
+    // Tell OpenGL programmable pipeline how to locate vertex position data
+    int vertexLocation = program->attributeLocation("a_position");
+    program->enableAttributeArray(vertexLocation);
+    program->setAttributeBuffer(vertexLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
+
+    // Offset for texture coordinate
+    offset += sizeof(QVector3D);
+
+    // Tell OpenGL programmable pipeline how to locate vertex texture coordinate data
+    int texcoordLocation = program->attributeLocation("a_texcoord");
+    program->enableAttributeArray(texcoordLocation);
+    program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
+
+    // Draw cube geometry using indices from VBO 1
+    glDrawElements(GL_TRIANGLE_STRIP, 34, GL_UNSIGNED_SHORT, 0);
 }

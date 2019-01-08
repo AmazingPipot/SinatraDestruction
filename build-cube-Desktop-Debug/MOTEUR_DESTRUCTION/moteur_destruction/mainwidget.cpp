@@ -70,11 +70,15 @@ MainWidget::MainWidget(int fps, int saison, QWidget *parent) :
     texture(0),
     angularSpeed(0),
     FPS(60),
-    Saison(saison)
+    Saison(saison),
+    Dacam(Camera(10,10,10))
 
 {
     objDestructible = QVector<Mesh*>();
     BasiqueSaison();
+    setMouseTracking(true);
+    Bat = new SuperStructure(5.0f,5.0f,10.0f,10.0f,100.0f,0);
+
 }
 
 /*MainWidget::MainWidget(int fps, int saison) :
@@ -117,34 +121,22 @@ void MainWidget::keyPressEvent(QKeyEvent *e)
             break;
 
         case Qt::Key_Left:
-            X+=1.0f;
+            Dacam.processMovement(Direction::LEFT,0.5f);
             break;
 
         case Qt::Key_Right:
-            X-=1.0f;
+            Dacam.processMovement(Direction::RIGHT,0.5f);
             break;
 
         case Qt::Key_Down:
-            Y+=1.0f;
+            Dacam.processMovement(Direction::BACKWARD,0.5f);
             break;
 
         case Qt::Key_Up:
-            Y-=1.0f;
+            Dacam.processMovement(Direction::FORWARD,0.5f);
             break;
         default : break;
     }
-    /*if (e->key()==Qt::Key_Left){
-        X-=1.0;
-    }
-    else if (e->key()==Qt::Key_Right){
-        X+=1.0;
-    }
-    if (e->key()==Qt::Key_Down){
-        Y-=1.0;
-    }
-    else if (e->key()==Qt::Key_Up){
-        Y+=1.0;
-    }*/
     if (e->key()==Qt::Key_Space){
         aff += 1;
         aff = aff % 2;
@@ -188,6 +180,16 @@ void MainWidget::mouseReleaseEvent(QMouseEvent *e)
 
     // Increase angular speed
     angularSpeed += acc;
+}
+
+void MainWidget::mouseMoveEvent(QMouseEvent *e)
+{
+    QPoint center = mapToGlobal(QPoint(width() / 2.f, height() / 2.f));
+    Dacam.processMouseMovement((width() / 2.f - e->pos().x()), height() / 2.f - e->pos().y());
+    QCursor c = cursor();
+    c.setPos(center);
+    c.setShape(Qt::BlankCursor);
+    setCursor(c);
 }
 //! [0]
 
@@ -288,7 +290,7 @@ void MainWidget::initShaders()
 void MainWidget::applyGravity(){
     destroyOutOfMap();
     Mesh** daObj = objDestructible.data();
-    fprintf(stderr,"info list : %d autre liste : %d \n",newListDebrisSol.size(),newListDebris.size());
+    //fprintf(stderr,"info list : %d autre liste : %d \n",newListDebrisSol.size(),newListDebris.size());
 
     for(int i=objDestructible.size()-1;i>=0;i--){
 
@@ -587,7 +589,7 @@ void MainWidget::initTextures()
 
     // Wrap texture coordinates by repeating
     // f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)
-    texture->setWrapMode(QOpenGLTexture::Repeat);
+    texture->setWrapMode(QOpenGLTexture::ClampToEdge);
 }
 //! [4]
 
@@ -627,12 +629,12 @@ void MainWidget::paintGL()
     // Calculate model view transformation
     QMatrix4x4 matrix;
     matrix.translate(X, Y, Z);
-    matrix.rotate(-45, QVector3D(1,0,0));
+    //matrix.rotate(-45, QVector3D(1,0,0));
     //matrix.rotate(s * (i++),QVector3D(0,0,1));
 
     //matrix.pivoter();
     // Set modelview-projection matrix
-    program.setUniformValue("mvp_matrix", projection * matrix);
+    program.setUniformValue("mvp_matrix", projection * Dacam.getViewMatrix() * matrix);
     program.setUniformValue("ambiant_color", CouleurSaison);
     program.setUniformValue("light_position", QVector4D(8.0, 8.0, 8.0, 1.0));
 //! [6]
@@ -644,6 +646,8 @@ void MainWidget::paintGL()
     //geometries->drawCubeGeometry(&program);
     //geometries->drawPlaneGeometry(&program);
     geometries->drawQuadPlaneGeometry(&program);
+
+    //Bat->DrawStructure(&program);
 
     /*if (listDebris.size() != 0){
         for (int i = 0; i < listDebris.size(); i++){

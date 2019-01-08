@@ -152,14 +152,14 @@ void GeometryEngine::reinitialiserMapDebris(){
     QString str = "/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
     CarteDebris.save(str,"pgm");
 }
-QImage GeometryEngine::SauvegardeMapDebris(){
+void GeometryEngine::SauvegardeMapDebris(){
     //QString str = "/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
     QString str = "/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
     CarteDebris.save(str,"pgm");
     CarteDebris.load("/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm");
     //fprintf(stderr," Sauvegarde de la map effectué ");
     printf(" Sauvegarde de la map effectué ");
-    return CarteDebris;
+    //return CarteDebris;
 }
 float GeometryEngine::positionAltitude(float x, float y){
 
