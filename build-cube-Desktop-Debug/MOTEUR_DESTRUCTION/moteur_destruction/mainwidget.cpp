@@ -77,7 +77,12 @@ MainWidget::MainWidget(int fps, int saison, QWidget *parent) :
     objDestructible = QVector<Mesh*>();
     BasiqueSaison();
     setMouseTracking(true);
+
     Bat = new SuperStructure(5.0f,5.0f,10.0f,10.0f,100.0f,0);
+
+
+
+    KeyZ_Down = false;
 
 }
 
@@ -133,6 +138,7 @@ void MainWidget::keyPressEvent(QKeyEvent *e)
             break;
 
         case Qt::Key_Up:
+        KeyZ_Down = true;
             Dacam.processMovement(Direction::FORWARD,0.5f);
             break;
         default : break;
@@ -154,6 +160,18 @@ void MainWidget::keyPressEvent(QKeyEvent *e)
             s-=0.01;
         }
     }
+}
+
+void MainWidget::keyReleaseEvent(QKeyEvent *e)
+{   switch(e->key()){
+
+        case Qt::Key_Up:
+        KeyZ_Down = false;
+
+            break;
+        default : break;
+    }
+
 }
 
 //! [0]
@@ -210,6 +228,8 @@ void MainWidget::timerEvent(QTimerEvent *)
         // Request an update
 
     }
+    if(KeyZ_Down)
+        Dacam.processMovement(Direction::FORWARD,0.5f);
     update();
 
 }

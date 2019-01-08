@@ -116,6 +116,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
+    void keyReleaseEvent(QKeyEvent *e) override;
     void timerEvent(QTimerEvent *e) override;
     void wheelEvent(QWheelEvent *e) override;
     void initializeGL() override;
@@ -164,6 +165,8 @@ private:
     int aff = 1;
     Camera Dacam;
     QVector<Mesh*> objDestructible;
+
+    bool KeyZ_Down;
 
 };
 
