@@ -80,6 +80,7 @@ typedef struct mesh{
 #define MAINWIDGET_H
 
 #include "geometryengine.h"
+#include "camera.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -112,6 +113,7 @@ public:
 protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
     void timerEvent(QTimerEvent *e) override;
     void wheelEvent(QWheelEvent *e) override;
@@ -158,7 +160,7 @@ private:
     float Y = 0.0;
     float Z = -5.0;
     int aff = 1;
-
+    Camera Dacam;
     QVector<Mesh*> objDestructible;
 
 };

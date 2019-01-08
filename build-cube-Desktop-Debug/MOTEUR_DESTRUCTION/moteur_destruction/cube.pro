@@ -8,7 +8,8 @@ SOURCES += main.cpp \
     debris.cpp \
     gestionbatiment.cpp \
     immeuble.cpp \
-    superstructure.cpp
+    superstructure.cpp \
+    camera.cpp
 
 SOURCES += \
     mainwidget.cpp \
@@ -22,7 +23,8 @@ HEADERS += \
     gestionbatiment.h \
     immeuble.h \
     destructmesh.h \
-    superstructure.h
+    superstructure.h \
+    camera.h
 
 RESOURCES += \
     shaders.qrc \

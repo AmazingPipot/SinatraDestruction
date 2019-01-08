@@ -95,9 +95,9 @@ void translateMesh(Mesh* mush,float x,float y,float z){
 
 void applyForce(Mesh* mush){
     translateMesh(mush,mush->cube.dirX,mush->cube.dirY,mush->cube.dirZ);
-    mush->cube.dirX*=0.91;
-    mush->cube.dirY*=0.91;
-    mush->cube.dirZ*=0.91;
+    mush->cube.dirX*=0.95;
+    mush->cube.dirY*=0.95;
+    mush->cube.dirZ*=0.95;
     if(mush->cube.dirX < 0.001) mush->cube.dirX=0;
     if(mush->cube.dirY < 0.001) mush->cube.dirY=0;
     if(mush->cube.dirZ < 0.001) mush->cube.dirZ=0;
