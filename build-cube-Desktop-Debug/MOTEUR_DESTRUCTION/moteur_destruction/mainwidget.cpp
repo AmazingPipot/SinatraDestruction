@@ -78,10 +78,6 @@ MainWidget::MainWidget(int fps, int saison, QWidget *parent) :
     BasiqueSaison();
     setMouseTracking(true);
 
-    Bat = new SuperStructure(5.0f,5.0f,10.0f,10.0f,100.0f,0);
-
-
-
     KeyZ_Down = false;
 
 }
@@ -148,8 +144,9 @@ void MainWidget::keyPressEvent(QKeyEvent *e)
         aff = aff % 2;
     }
     if (e->key()==Qt::Key_Backspace){
-        printf("ON REINITIALISE LA MAP");
+        printf(" ON REINITIALISE LA MAP ");
         geometries->reinitialiserMapDebris();
+        geometries->initMapQuadTree(geometries->posX,geometries->posY);
     }
 
     if (e->key()==Qt::Key_Plus){
@@ -268,15 +265,11 @@ void MainWidget::initializeGL()
 //! [2]
 //!
     geometries = new GeometryEngine(10.0 *  qrand() / (float) RAND_MAX,10.0 * ((float) qrand()) / (float) RAND_MAX, SCALE);
+    Bat = new SuperStructure(0.0f,0.0f,100.0f,100.0f,100.0f,0);
     for(int i=0;i<201;i++){
         objDestructible.append(fromCubeToTrueMesh(CubeCreator(geometries->tailleMap * qrand()/RAND_MAX, geometries->tailleMap * qrand()/RAND_MAX, (1.0 + 10.0 * qrand()/RAND_MAX)+10,0.5,0.5,0.5),10));
-        fprintf(stderr,"info debris %f %f \n",objDestructible[i]->cube.sizeX,objDestructible[i]->cube.sizeY);
+        //fprintf(stderr,"info debris %f %f \n",objDestructible[i]->cube.sizeX,objDestructible[i]->cube.sizeY);
     }
-    /*for (int i = 0; i < 500; i++){
-        //debris = new Debris(10.0 * qrand()/RAND_MAX, 10.0 * qrand()/RAND_MAX, 1.0 + 2.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, SCALE);
-        //listDebris.push_back(new Debris(9.0 * qrand()/RAND_MAX, 9.0 * qrand()/RAND_MAX, (1.0 + 5.0 * qrand()/RAND_MAX), 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, SCALE));
-        //listDebrisChute.push_back(1);
-    }*/
 
     // Use QBasicTimer because its faster than QTimer
     if (FPS == 0){
@@ -308,33 +301,31 @@ void MainWidget::initShaders()
 //! [3]
 
 void MainWidget::applyGravity(){
-    destroyOutOfMap();
-    Mesh** daObj = objDestructible.data();
-    //fprintf(stderr,"info list : %d autre liste : %d \n",newListDebrisSol.size(),newListDebris.size());
+    if (objDestructible.size() != 0)
+    {
+        destroyOutOfMap();
+        Mesh** daObj = objDestructible.data();
+        //fprintf(stderr,"info list : %d autre liste : %d \n",newListDebrisSol.size(),newListDebris.size());
 
-    for(int i=objDestructible.size()-1;i>=0;i--){
+        for(int i=objDestructible.size()-1;i>=0;i--){
 
-        giveStrenght(daObj[i],0,0,-0.02f);
+            giveStrenght(daObj[i],0,0,-0.02f);
 
-        Cube cube = daObj[i]->cube;
+            Cube cube = daObj[i]->cube;
 
-        if (geometries->positionAltitude(daObj[i]->cube.x,daObj[i]->cube.y) < daObj[i]->cube.z)
-        {
-            applyForce(objDestructible[i]);
-            //applyForce(daObj[i]);
+            if (geometries->positionAltitude(daObj[i]->cube.x,daObj[i]->cube.y) < daObj[i]->cube.z)
+            {
+                applyForce(objDestructible[i]);
+                //applyForce(daObj[i]);
+            }
+            else
+            {
+                objDestructible[i]->cube.z = geometries->positionAltitude(objDestructible[i]->cube.x,objDestructible[i]->cube.y);
+                //daObj[i]->cube.z = geometries->positionAltitude(daObj[i]->cube.x,daObj[i]->cube.y);
+                newListDebrisSol.append(objDestructible[i]);
+                objDestructible.remove(i);
+            }
         }
-        else
-        {
-            objDestructible[i]->cube.z = geometries->positionAltitude(objDestructible[i]->cube.x,objDestructible[i]->cube.y);
-            //daObj[i]->cube.z = geometries->positionAltitude(daObj[i]->cube.x,daObj[i]->cube.y);
-            newListDebrisSol.append(objDestructible[i]);
-            objDestructible.remove(i);
-
-            //delete daObj[i];
-            //daObj[i]->
-
-        }
-
     }
     if (newListDebrisSol.size() != 0){
         if (newListDebrisSol.size() > 20){
@@ -345,8 +336,8 @@ void MainWidget::applyGravity(){
 
             }
             geometries->SauvegardeMapDebris();
+            geometries->initMapQuadTree(geometries->posX,geometries->posY);
         }
-    //listDebris.push_back(new Debris(9.0 * qrand()/RAND_MAX, 9.0 * qrand()/RAND_MAX, (1.0 + 5.0 * qrand()/RAND_MAX), 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, SCALE));
     }
 }
 
@@ -457,29 +448,32 @@ void MainWidget::drawObj(Mesh* mush,QOpenGLShaderProgram *program)
 }
 
 void MainWidget::destroyEverything(){
-    for(int i=0;i<objDestructible.size();i++){
-        fprintf(stderr,"|%d : %f %f %f|",objDestructible.at(i)->nbp,objDestructible.at(i)->cube.dirX,objDestructible.at(i)->cube.dirY,objDestructible.at(i)->cube.dirY);
-    }
-    fprintf(stderr,"]  --->  [");
-    QVector<Mesh*> newListDebris = QVector<Mesh*>();
-    for(;objDestructible.size()!=0;){
-        float x = 1.0*((float)qrand()/RAND_MAX);
-        float y = 1.0*((float)qrand()/RAND_MAX);
-        float z = 1.0*((float)qrand()/RAND_MAX);
-        int nbmesh=0;
-        Mesh** meshTab = breakMesh(objDestructible.takeAt(0),x,y,z,&nbmesh);
-        for(int i=0;i<nbmesh;i++){
-            newListDebris.append(meshTab[i]);
+    if (objDestructible.size())
+    {
+        for(int i=0;i<objDestructible.size();i++){
+            fprintf(stderr,"|%d : %f %f %f|",objDestructible.at(i)->nbp,objDestructible.at(i)->cube.dirX,objDestructible.at(i)->cube.dirY,objDestructible.at(i)->cube.dirY);
         }
-        free(meshTab);
+        fprintf(stderr,"]  --->  [");
+        QVector<Mesh*> newListDebris = QVector<Mesh*>();
+        for(;objDestructible.size()!=0;){
+            float x = 1.0*((float)qrand()/RAND_MAX);
+            float y = 1.0*((float)qrand()/RAND_MAX);
+            float z = 1.0*((float)qrand()/RAND_MAX);
+            int nbmesh=0;
+            Mesh** meshTab = breakMesh(objDestructible.takeAt(0),x,y,z,&nbmesh);
+            for(int i=0;i<nbmesh;i++){
+                newListDebris.append(meshTab[i]);
+            }
+            free(meshTab);
+        }
+        for(;newListDebris.size()!=0;){
+            objDestructible.append(newListDebris.takeAt(0));
+        }
+        for(int i=0;i<objDestructible.size();i++){
+            fprintf(stderr,"|%d : %f %f %f|",objDestructible.at(i)->nbp,objDestructible.at(i)->cube.dirX,objDestructible.at(i)->cube.dirY,objDestructible.at(i)->cube.dirY);
+        }
+        fprintf(stderr,"] size : %d",objDestructible.size());
     }
-    for(;newListDebris.size()!=0;){
-        objDestructible.append(newListDebris.takeAt(0));
-    }
-    for(int i=0;i<objDestructible.size();i++){
-        fprintf(stderr,"|%d : %f %f %f|",objDestructible.at(i)->nbp,objDestructible.at(i)->cube.dirX,objDestructible.at(i)->cube.dirY,objDestructible.at(i)->cube.dirY);
-    }
-    fprintf(stderr,"] size : %d",objDestructible.size());
 }
 
 //! [4]
@@ -513,85 +507,7 @@ void MainWidget::SaisonSuivante()
 void MainWidget::Gravity(){
     //debris->~Debris();
     //debris = new Debris(2.5, 2.5, debris->Z, debris->W, debris->L, debris->H, SCALE);
-    /*if (listDebris.size() != 0){
-        for (int i = 0; i < listDebris.size(); i++){
-            if (geometries->positionAltitude(listDebris[i]->X,listDebris[i]->Y) < listDebris[i]->Z){
-                listDebris[i]->chute();
-                listDebris[i] = new Debris(listDebris[i]->X, listDebris[i]->Y, listDebris[i]->Z, listDebris[i]->W, listDebris[i]->L, listDebris[i]->H, SCALE);
-            }
-            else {
-                listDebrisChute.push_back(listDebris[i]);
-                //printf("Taille : "+listDebris.size());
-                listSuppressionDebris.push_back(i);
-                //listDebris.removeAt(i);
-                //geometries->fusionDebrisMap(listDebris[i]->X,listDebris[i]->Y, listDebris[i]->W, listDebris[i]->L, listDebris[i]->H);
-                //listDebrisChute.removeAt(i);
-            }
-        }
 
-    }*/
-    /*if (listDebris.size() != 0){
-        int Index = listDebris.size();
-        for (int i = Index-1; i >= 0; i--){
-            if (geometries->positionAltitude(listDebris[i]->X,listDebris[i]->Y) < listDebris[i]->Z){
-                listDebris[i]->chute();
-                //listDebris[i] = new Debris(listDebris[i]->X, listDebris[i]->Y, listDebris[i]->Z, listDebris[i]->W, listDebris[i]->L, listDebris[i]->H, SCALE);
-            }
-            else{
-                listDebrisChute.push_back(listDebris[i]);
-                delete listDebrisChute[i];
-                //listDebris[i]->~Debris();
-                listDebris.removeAt(i);
-            }
-        }
-    }
-    if (listDebrisChute.size() != 0){
-        if (listDebrisChute.size() > 40){
-            for (int i = 0; i < 30; i++){
-                geometries->fusionDebrisMap(listDebrisChute[0]->X,listDebrisChute[0]->Y, listDebrisChute[0]->W, listDebrisChute[0]->L, listDebrisChute[0]->H);
-                delete listDebrisChute[0];
-                listDebrisChute.removeAt(0);
-            }
-        geometries->SauvegardeMapDebris();
-        }
-    //listDebris.push_back(new Debris(9.0 * qrand()/RAND_MAX, 9.0 * qrand()/RAND_MAX, (1.0 + 5.0 * qrand()/RAND_MAX), 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, SCALE));
-    }*/
-    /*if (listDebris.size() != 0 && listDebrisChute.size() == 0) {
-        //load++;
-        //load= load%2;
-        geometries->SauvegardeMapDebris();
-        listDebris.clear();
-        //geometries = new GeometryEngine(10*((float) rand()) / (float) RAND_MAX,10*((float) rand()) / (float) RAND_MAX, SCALE);
-
-        for (int i = 0; i < 10+load; i++){
-            debris = new Debris(10.0 * qrand()/RAND_MAX, 10.0 * qrand()/RAND_MAX, 1.0 + 2.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, SCALE);
-            listDebris.push_back(new Debris(9.0 * qrand()/RAND_MAX, 9.0 * qrand()/RAND_MAX, (1.0 + 5.0 * qrand()/RAND_MAX), 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, 1.0 + 5.0 * qrand()/RAND_MAX, SCALE));
-            listDebrisChute.push_back(1);
-            //printf("DEBRIS : %d %f %f \n",i, listDebris[i]->X, listDebris[i]->Y);
-        }
-    }*/
-}
-
-
-float d1 = 0.1, d2 = 0.1;
-
-void MainWidget::DeplacementPoint()
-{
-    if (posX < 0){
-        d1 = ((float) rand()) / (float) RAND_MAX+0.05;//random().range(0,)
-    }
-    if (posX > 10){
-        d1 = -((float) rand()) / (float) RAND_MAX-0.05;
-    }
-    if (posY < 0){
-        d2 = ((float) rand()) / (float) RAND_MAX+0.05;
-    }
-    if (posY > 10){
-        d2 = -((float) rand()) / (float) RAND_MAX-0.05;
-    }
-    posX += d1;
-    posY += d2;
-    geometries = new  GeometryEngine(posX,posY, SCALE);
 }
 
 void MainWidget::initTextures()
@@ -669,28 +585,19 @@ void MainWidget::paintGL()
 
     //Bat->DrawStructure(&program);
 
-    /*if (listDebris.size() != 0){
-        for (int i = 0; i < listDebris.size(); i++){
-            //->drawDebris(&program);
-            listDebris[i]->drawDebris(&program);
-        }
+    if (objDestructible.size() != 0)
+    {
+        applyGravity();
+        //Mesh** daObj = objDestructible.data();
+            /*for(int i=0;i<objDestructible.size();i++){
+                //drawObj(daObj[i],&program);
+                drawObj(objDestructible[i],&program);
+            }*/
+            for(int i=0;i<newListDebrisSol.size();i++){
+                //drawObj(daObj[i],&program);
+                drawObj(newListDebrisSol[i],&program);
+            }
     }
-    if (listDebrisChute.size() != 0){
-        for (int i = 0; i < listDebrisChute.size(); i++){
-            //->drawDebris(&program);
-            listDebrisChute[i]->drawDebris(&program);
-        }
-    }*/
-    applyGravity();
-    Mesh** daObj = objDestructible.data();
-        for(int i=0;i<objDestructible.size();i++){
-            //drawObj(daObj[i],&program);
-            drawObj(objDestructible[i],&program);
-        }
-        for(int i=0;i<newListDebrisSol.size();i++){
-            //drawObj(daObj[i],&program);
-            drawObj(newListDebrisSol[i],&program);
-        }
     //debris->drawDebris(&program);
     TimeFin = clock();
 

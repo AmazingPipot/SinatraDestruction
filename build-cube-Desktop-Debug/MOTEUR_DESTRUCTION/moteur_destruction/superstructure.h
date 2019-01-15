@@ -6,11 +6,13 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
+#include <QOpenGLTexture>
 
 class SuperStructure : protected QOpenGLFunctions
 {
 public:
     SuperStructure(float x, float y, float w, float h, float d, int type);
+    ~SuperStructure();
     QList<SuperStructure> listStructure;
     //QList<Mesh> listElementDestructible;
 

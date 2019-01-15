@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     QObject::connect(&Saison,SIGNAL(timeout()), &widget3, SLOT(SaisonSuivante()));
     QObject::connect(&Saison,SIGNAL(timeout()), &widget4, SLOT(SaisonSuivante()));*/
 
-    QObject::connect(&Time,SIGNAL(timeout()), &widget, SLOT(DeplacementPoint()));
+
     QObject::connect(&Time,SIGNAL(timeout()), &widget, SLOT(Gravity()));
     /*QObject::connect(&Time,SIGNAL(timeout()), &widget2, SLOT(DeplacementPoint()));
     QObject::connect(&Time,SIGNAL(timeout()), &widget3, SLOT(DeplacementPoint()));

@@ -93,6 +93,7 @@ public:
     float RatioX;
     float RatioY;
     float RatioZ;
+    float posX, posY;
 
 
 

@@ -135,7 +135,6 @@ protected:
 
 public slots:
     void SaisonSuivante();
-    void DeplacementPoint();
     void Gravity();
 
 private:

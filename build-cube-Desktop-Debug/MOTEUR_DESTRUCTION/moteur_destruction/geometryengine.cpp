@@ -73,9 +73,11 @@ struct VertexData
 };
 
 //! [0]
-GeometryEngine::GeometryEngine(float posX, float posY, float s)
+GeometryEngine::GeometryEngine(float x, float y, float s)
     : indexBuf(QOpenGLBuffer::IndexBuffer),
       tailleMap(20),
+      posX(x),
+      posY(y),
       RatioX(1),
       RatioY(1),
       RatioZ(1)
@@ -108,10 +110,7 @@ GeometryEngine::~GeometryEngine()
 void GeometryEngine::initMaps(){
 
     Carte.load("/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/heightMap.pgm");
-    //Carte.load("/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/heightMap.pgm");
-    //CarteDebris.load("/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm");
     CarteDebris.load("/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm");
-    //CarteBatiment.load("/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/heigtMapBatiment.pgm");
     CarteBatiment.load("/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/heigtMapBatiment.pgm");
 
     RatioX = CarteDebris.width() / tailleMap;//Carte.width();//*tailleMap;
@@ -122,7 +121,6 @@ void GeometryEngine::initMaps(){
 }
 
 void GeometryEngine::fusionDebrisMap(float x, float y, float w, float l, float h){
-    //QString str = "/auto_home/qleroit/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
     QString str = "/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
     int p = positionAltitude(x,y);
     int pp = p + h * RatioZ;
@@ -358,6 +356,9 @@ void constructionVertex(QuadTree Q, VertexData* Vertices, float l, float L, QIma
 
 void GeometryEngine::initMapQuadTree(float posX, float posY)
 {
+    //arrayBuf.destroy();
+    //indexBuf.destroy();
+
     //QuadTree Quad = QuadTree(0,0,100*Scale,100*Scale,posX,posY,0.01,20,8);
     QuadTree Quad = QuadTree(0,0,tailleMap,tailleMap,6);
     nb = Quad.feuille();

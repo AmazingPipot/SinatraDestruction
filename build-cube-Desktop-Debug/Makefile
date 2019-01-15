@@ -411,6 +411,7 @@ moc_mainwidget.cpp: MOTEUR_DESTRUCTION/moteur_destruction/geometryengine.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/quadtree.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/debris.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/camera.h \
+		MOTEUR_DESTRUCTION/moteur_destruction/superstructure.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
@@ -434,7 +435,8 @@ main.o: MOTEUR_DESTRUCTION/moteur_destruction/main.cpp MOTEUR_DESTRUCTION/moteur
 		MOTEUR_DESTRUCTION/moteur_destruction/geometryengine.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/quadtree.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/debris.h \
-		MOTEUR_DESTRUCTION/moteur_destruction/camera.h
+		MOTEUR_DESTRUCTION/moteur_destruction/camera.h \
+		MOTEUR_DESTRUCTION/moteur_destruction/superstructure.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o MOTEUR_DESTRUCTION/moteur_destruction/main.cpp
 
 quadtree.o: MOTEUR_DESTRUCTION/moteur_destruction/quadtree.cpp MOTEUR_DESTRUCTION/moteur_destruction/quadtree.h
@@ -461,6 +463,7 @@ mainwidget.o: MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.cpp MOTEUR_DESTRU
 		MOTEUR_DESTRUCTION/moteur_destruction/quadtree.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/debris.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/camera.h \
+		MOTEUR_DESTRUCTION/moteur_destruction/superstructure.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/destructmesh.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwidget.o MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.cpp
 
