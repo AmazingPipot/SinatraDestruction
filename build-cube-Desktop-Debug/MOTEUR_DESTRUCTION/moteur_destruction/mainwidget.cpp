@@ -445,6 +445,7 @@ void MainWidget::drawObj(Mesh* mush,QOpenGLShaderProgram *program)
 
     // Draw cube geometry using indices from VBO 1
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+    free(VD);
 }
 
 void MainWidget::destroyEverything(){
@@ -589,10 +590,10 @@ void MainWidget::paintGL()
     {
         applyGravity();
         //Mesh** daObj = objDestructible.data();
-            /*for(int i=0;i<objDestructible.size();i++){
+            for(int i=0;i<objDestructible.size();i++){
                 //drawObj(daObj[i],&program);
                 drawObj(objDestructible[i],&program);
-            }*/
+            }
             for(int i=0;i<newListDebrisSol.size();i++){
                 //drawObj(daObj[i],&program);
                 drawObj(newListDebrisSol[i],&program);
