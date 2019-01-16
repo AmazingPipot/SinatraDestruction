@@ -1,6 +1,7 @@
 #ifndef SUPERSTRUCTURE_H
 #define SUPERSTRUCTURE_H
 //#include "destructmesh.h"
+#include "geometryengine.h"
 #include <QList>
 
 #include <QOpenGLFunctions>
@@ -11,7 +12,7 @@
 class SuperStructure : protected QOpenGLFunctions
 {
 public:
-    SuperStructure(float x, float y, float w, float h, float d, int type);
+    SuperStructure(float x, float y, float w, float z, float h, float d, int type, GeometryEngine* geo);
     ~SuperStructure();
     QList<SuperStructure> listStructure;
     //QList<Mesh> listElementDestructible;
@@ -30,6 +31,8 @@ public:
     void DrawStructure(QOpenGLShaderProgram *program);
 
 private:
+    GeometryEngine* terrain;
+
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;
 };

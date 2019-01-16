@@ -353,24 +353,5 @@ Mesh** breakMesh(Mesh* mush,float x,float y,float z,int* nbmesh){
     return meshTab;
 }
 
-
-/*int main(int argc,char** argv){
-    Cube cube = CubeCreator(0,0,10,2,2,2);
-    Mesh* mush = fromCubeToTrueMesh(cube,10);
-    int nbMesh;
-    Mesh** meshTab = breakMesh(mush,0.5,0.5,0.5,&nbMesh);
-    //fprintf(stderr,"%d == %d\n",countLinks(mush),mush->nbl);
-    for(int i=0;i<nbMesh;i++){
-        fprintf(stderr,"%d : %d point && %d links\n",i,meshTab[i]->nbp,meshTab[i]->nbl);
-        //freeMeshComplete(meshTab[i]);
-    }
-    meshTab = breakMesh(meshTab[0],0.5,0.5,0.5,&nbMesh);
-    for(int i=0;i<nbMesh;i++){
-        fprintf(stderr,"%d : %d point && %d links\n",i,meshTab[i]->nbp,meshTab[i]->nbl);
-        //freeMeshComplete(meshTab[i]);
-    }
-    //free(meshTab);
-}*/
-
 #endif // DESTRUCTMESH_H
 

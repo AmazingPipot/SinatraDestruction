@@ -249,7 +249,7 @@ void MainWidget::initializeGL()
 {
     initializeOpenGLFunctions();
 
-    glClearColor(0.5, 0.5, 0.5, 1);
+    glClearColor(0.3, 0.5, 0.7, 1);
 
 
 
@@ -265,11 +265,26 @@ void MainWidget::initializeGL()
 //! [2]
 //!
     geometries = new GeometryEngine(10.0 *  qrand() / (float) RAND_MAX,10.0 * ((float) qrand()) / (float) RAND_MAX, SCALE);
-    Bat = new SuperStructure(0.0f,0.0f,100.0f,100.0f,100.0f,0);
-    for(int i=0;i<201;i++){
-        objDestructible.append(fromCubeToTrueMesh(CubeCreator(geometries->tailleMap * qrand()/RAND_MAX, geometries->tailleMap * qrand()/RAND_MAX, (1.0 + 10.0 * qrand()/RAND_MAX)+10,0.5,0.5,0.5),10));
-        //fprintf(stderr,"info debris %f %f \n",objDestructible[i]->cube.sizeX,objDestructible[i]->cube.sizeY);
+    ;
+    int I = 5.0f *  qrand() / (float) RAND_MAX + 4;
+    int J = 5.0f *  qrand() / (float) RAND_MAX + 4;
+
+    float ll = 0.0f, LL = 0.0f, taille1 = geometries->tailleMap / I, taille2 = geometries->tailleMap / J;
+
+    for (int i = 0; i < I; i++)
+    {
+        for (int j = 0; j < J; j++)
+        {
+            listStructure.append(new SuperStructure(i * taille1 + ll + 2.0f *  qrand() / (float) RAND_MAX,j * taille2 + LL +  2.0f *  qrand() / (float) RAND_MAX,0.0f,2.0 *  qrand() / (float) RAND_MAX+1.0f,2.0 *  qrand() / (float) RAND_MAX+1.0f,2.0 *  qrand() / (float) RAND_MAX+1.0f,0,geometries));
+            ll = listStructure[i*J+j]->Width;
+            LL = listStructure[i*J+j]->Height;
+        }
+
     }
+
+    /*for(int i=0;i<201;i++){
+        objDestructible.append(fromCubeToTrueMesh(CubeCreator(geometries->tailleMap * qrand()/RAND_MAX, geometries->tailleMap * qrand()/RAND_MAX, (1.0 + 10.0 * qrand()/RAND_MAX)+10,0.5,0.5,0.5),10));
+    }*/
 
     // Use QBasicTimer because its faster than QTimer
     if (FPS == 0){
@@ -578,13 +593,15 @@ void MainWidget::paintGL()
 
     // Use texture unit 0 which contains cube.png
     program.setUniformValue("texture", 0);
-
-    // Draw cube geometry
-    //geometries->drawCubeGeometry(&program);
-    //geometries->drawPlaneGeometry(&program);
     geometries->drawQuadPlaneGeometry(&program);
 
-    //Bat->DrawStructure(&program);
+    if (listStructure.size() != 0)
+    {
+        for (int i = 0; i < listStructure.size(); i++)
+        {
+            listStructure[i]->DrawStructure(&program);
+        }
+    }
 
     if (objDestructible.size() != 0)
     {
@@ -599,7 +616,7 @@ void MainWidget::paintGL()
                 drawObj(newListDebrisSol[i],&program);
             }
     }
-    //debris->drawDebris(&program);
+
     TimeFin = clock();
 
     temps = (float)(TimeFin-TimeDebut)/CLOCKS_PER_SEC;

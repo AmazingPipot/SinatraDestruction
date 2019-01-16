@@ -92,6 +92,7 @@ public:
     float tailleMap;
     float RatioX;
     float RatioY;
+    float RatioAltitude = 128.0;
     float RatioZ;
     float posX, posY;
 

@@ -142,6 +142,7 @@ private:
     QOpenGLShaderProgram program;
     GeometryEngine *geometries;
     SuperStructure *Bat;
+    QList<SuperStructure*> listStructure;
     QList<Debris*> listDebris;
     QList<Debris*> listDebrisChute;
     QList<int> listSuppressionDebris;

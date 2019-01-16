@@ -123,7 +123,7 @@ void GeometryEngine::initMaps(){
 void GeometryEngine::fusionDebrisMap(float x, float y, float w, float l, float h){
     QString str = "/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
     int p = positionAltitude(x,y);
-    int pp = p + h * RatioZ;
+    int pp = (p + h)*RatioAltitude;
     fprintf(stderr,"\n %d \n ",pp);
     int xx = x * CarteDebris.width()/tailleMap;
     int yy = y * CarteDebris.height()/tailleMap;
@@ -162,7 +162,7 @@ void GeometryEngine::SauvegardeMapDebris(){
 float GeometryEngine::positionAltitude(float x, float y){
 
     //fprintf(stderr," Jusqu'à la tout va bien \n");
-    float z = qGray(Carte.pixel(x*(Carte.width()-1)/tailleMap,y*(Carte.height()-1)/tailleMap))/128.0/*+qGray(CarteDebris.pixel(x*(CarteDebris.width()-1)/tailleMap,y*(CarteDebris.height()-1)/tailleMap))/128.0*/;
+    float z = qGray(Carte.pixel(x*(Carte.width()-1)/tailleMap,y*(Carte.height()-1)/tailleMap))/RatioAltitude+qGray(CarteDebris.pixel(x*(CarteDebris.width()-1)/tailleMap,y*(CarteDebris.height()-1)/tailleMap))/128.0;
     //fprintf(stderr," Je fais le out ici \n");
     return z;
 }
@@ -295,32 +295,44 @@ void constructionVertex(QuadTree Q, VertexData* Vertices, float l, float L, QIma
 
         float x2 = Q.X+Q.longueur;
         float y2 = Q.Y+Q.largeur;
-        float z2 = qGray(Im.pixel(x2*(Im.width()-1)/l,y2*(Im.height()-1)/L))/128.0+qGray(Im2.pixel(x2*(Im2.width()-1)/l,y2*(Im2.height()-1)/L))/128.0;
+        bool deb = false;
+        float tex1;
+        float tex2;
+        float tex3;
+        float tex4;
+        if (qGray(Im2.pixel(Q.X*(Im2.width()-1)/l,Q.Y*(Im2.height()-1)/L))/128.0 > 0
+                || qGray(Im2.pixel((Q.X+Q.longueur)*(Im2.width()-1)/l,Q.Y*(Im2.height()-1)/L))/128.0 > 0
+                || qGray(Im2.pixel(Q.X*(Im2.width()-1)/l,(Q.Y+Q.largeur)*(Im2.height()-1)/L))/128.0 > 0
+                || qGray(Im2.pixel((Q.X+Q.longueur)*(Im2.width()-1)/l,(Q.Y+Q.largeur)*(Im2.height()-1)/L))/128.0 > 0)
+        {
+            deb = true;
+        }
+
+        if (deb == true)
+        {
+            tex1 = 0.0f;
+            tex2 = 20.0f/512.0f;
+            tex3 = tex1;
+            tex4 = tex2;
+        }
+        else
+        {
+            tex1 = 0.0f;
+            tex2 = 20.0f/512.0f;
+            tex3 = 20.0f/512.0f;
+            tex4 = 40.0f/512.0f;
+        }
+        //float z2 = qGray(Im.pixel(x2*(Im.width()-1)/l,y2*(Im.height()-1)/L))/128.0+col;
 
         float x = Q.X;
         float y = Q.Y;
         float z = qGray(Im.pixel(x*(Im.width()-1)/l,y*(Im.height()-1)/L))/128.0+qGray(Im2.pixel(x*(Im2.width()-1)/l,y*(Im2.height()-1)/L))/128.0;
 
-        float H = abs(z2-z);
+        //float H = abs(z2-z);
 
-
-        //printf("Z1 %f  Z2 %f l %f L %f ",z,z2, l, L);
-        float r;
-        if (abs(z-z2)>0.5 || z > 0.7)
-        {
-            r = 0.0;
-        }
-        else
-        {
-            r= 12.0;//qrand()*5.0/RAND_MAX;
-        }
-        float a = r/512.0;
-        float b = (r+12.0)/512.0;
-
-        //printf("PALETTE %f %f %f\n",a,b, r);
         VertexData vertex;
         vertex.position = QVector3D(x,y,z);
-        vertex.texCoord = QVector2D(a,a);
+        vertex.texCoord = QVector2D(tex1,tex3);
         vertex.normal = QVector4D(0.0f, 0.0f, 0.0f,0.0f);
         Vertices[(*pos)++] = vertex;
 
@@ -328,23 +340,22 @@ void constructionVertex(QuadTree Q, VertexData* Vertices, float l, float L, QIma
         y = Q.Y;
         z = qGray(Im.pixel(x*(Im.width()-1)/l,y*(Im.height()-1)/L))/128.0+qGray(Im2.pixel(x*(Im2.width()-1)/l,y*(Im2.height()-1)/L))/128.0;
         vertex.position = QVector3D(x,y,z);
-        vertex.texCoord = QVector2D(a,b);
+        vertex.texCoord = QVector2D(tex2,tex3);
         Vertices[(*pos)++] = vertex;
 
-        //x2 = Q.X+Q.longueur;
-        //y2 = Q.Y+Q.largeur;
-        //z2 = qGray(Im.pixel(x*(Im.width()-1)/l,y*(Im.height()-1)/L))/128.0+qGray(Im2.pixel(x*(Im2.width()-1)/l,y*(Im2.height()-1)/L))/128.0;
-        vertex.position = QVector3D(x2,y2,z2);
-        vertex.texCoord = QVector2D(a+47.0/512.0,b);
+        x = Q.X+Q.longueur;
+        y = Q.Y+Q.largeur;
+        z = qGray(Im.pixel(x*(Im.width()-1)/l,y*(Im.height()-1)/L))/128.0+qGray(Im2.pixel(x*(Im2.width()-1)/l,y*(Im2.height()-1)/L))/128.0;;
+        vertex.position = QVector3D(x,y,z);
+        vertex.texCoord = QVector2D(tex2,tex4);
         Vertices[(*pos)++] = vertex;
 
         x = Q.X;
         y = Q.Y+Q.largeur;
-        z = qGray(Im.pixel(x*(Im.width()-1)/l,y*(Im.height()-1)/L))/128.0+qGray(Im2.pixel(x*(Im2.width()-1)/l,y*(Im2.height()-1)/L))/128.0;;
+        z = qGray(Im.pixel(x*(Im.width()-1)/l,y*(Im.height()-1)/L))/128.0+qGray(Im2.pixel(x*(Im2.width()-1)/l,y*(Im2.height()-1)/L))/128.0;
         vertex.position = QVector3D(x,y,z);
-        vertex.texCoord = QVector2D(a+47.0/512.0,a);
+        vertex.texCoord = QVector2D(tex1,tex4);
         Vertices[(*pos)++] = vertex;
-         //std::cout << "Vertex "<< Q.X << std::endl;
         return;
     }
     constructionVertex(*Q.Nord,Vertices,l,L,Im,Im2,pos);
