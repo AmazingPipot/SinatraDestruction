@@ -57,6 +57,7 @@ SOURCES       = MOTEUR_DESTRUCTION/moteur_destruction/main.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/immeuble.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/superstructure.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/camera.cpp \
+		MOTEUR_DESTRUCTION/moteur_destruction/boolet.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/geometryengine.cpp qrc_shaders.cpp \
 		qrc_textures.cpp \
@@ -68,6 +69,7 @@ OBJECTS       = main.o \
 		immeuble.o \
 		superstructure.o \
 		camera.o \
+		boolet.o \
 		mainwidget.o \
 		geometryengine.o \
 		qrc_shaders.o \
@@ -155,13 +157,15 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		MOTEUR_DESTRUCTION/moteur_destruction/immeuble.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/destructmesh.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/superstructure.h \
-		MOTEUR_DESTRUCTION/moteur_destruction/camera.h MOTEUR_DESTRUCTION/moteur_destruction/main.cpp \
+		MOTEUR_DESTRUCTION/moteur_destruction/camera.h \
+		MOTEUR_DESTRUCTION/moteur_destruction/boolet.h MOTEUR_DESTRUCTION/moteur_destruction/main.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/quadtree.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/debris.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/gestionbatiment.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/immeuble.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/superstructure.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/camera.cpp \
+		MOTEUR_DESTRUCTION/moteur_destruction/boolet.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.cpp \
 		MOTEUR_DESTRUCTION/moteur_destruction/geometryengine.cpp
 QMAKE_TARGET  = cube
@@ -352,8 +356,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents MOTEUR_DESTRUCTION/moteur_destruction/shaders.qrc MOTEUR_DESTRUCTION/moteur_destruction/textures.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.h MOTEUR_DESTRUCTION/moteur_destruction/geometryengine.h MOTEUR_DESTRUCTION/moteur_destruction/quadtree.h MOTEUR_DESTRUCTION/moteur_destruction/debris.h MOTEUR_DESTRUCTION/moteur_destruction/gestionbatiment.h MOTEUR_DESTRUCTION/moteur_destruction/immeuble.h MOTEUR_DESTRUCTION/moteur_destruction/destructmesh.h MOTEUR_DESTRUCTION/moteur_destruction/superstructure.h MOTEUR_DESTRUCTION/moteur_destruction/camera.h $(DISTDIR)/
-	$(COPY_FILE) --parents MOTEUR_DESTRUCTION/moteur_destruction/main.cpp MOTEUR_DESTRUCTION/moteur_destruction/quadtree.cpp MOTEUR_DESTRUCTION/moteur_destruction/debris.cpp MOTEUR_DESTRUCTION/moteur_destruction/gestionbatiment.cpp MOTEUR_DESTRUCTION/moteur_destruction/immeuble.cpp MOTEUR_DESTRUCTION/moteur_destruction/superstructure.cpp MOTEUR_DESTRUCTION/moteur_destruction/camera.cpp MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.cpp MOTEUR_DESTRUCTION/moteur_destruction/geometryengine.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.h MOTEUR_DESTRUCTION/moteur_destruction/geometryengine.h MOTEUR_DESTRUCTION/moteur_destruction/quadtree.h MOTEUR_DESTRUCTION/moteur_destruction/debris.h MOTEUR_DESTRUCTION/moteur_destruction/gestionbatiment.h MOTEUR_DESTRUCTION/moteur_destruction/immeuble.h MOTEUR_DESTRUCTION/moteur_destruction/destructmesh.h MOTEUR_DESTRUCTION/moteur_destruction/superstructure.h MOTEUR_DESTRUCTION/moteur_destruction/camera.h MOTEUR_DESTRUCTION/moteur_destruction/boolet.h $(DISTDIR)/
+	$(COPY_FILE) --parents MOTEUR_DESTRUCTION/moteur_destruction/main.cpp MOTEUR_DESTRUCTION/moteur_destruction/quadtree.cpp MOTEUR_DESTRUCTION/moteur_destruction/debris.cpp MOTEUR_DESTRUCTION/moteur_destruction/gestionbatiment.cpp MOTEUR_DESTRUCTION/moteur_destruction/immeuble.cpp MOTEUR_DESTRUCTION/moteur_destruction/superstructure.cpp MOTEUR_DESTRUCTION/moteur_destruction/camera.cpp MOTEUR_DESTRUCTION/moteur_destruction/boolet.cpp MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.cpp MOTEUR_DESTRUCTION/moteur_destruction/geometryengine.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -452,11 +456,17 @@ gestionbatiment.o: MOTEUR_DESTRUCTION/moteur_destruction/gestionbatiment.cpp MOT
 immeuble.o: MOTEUR_DESTRUCTION/moteur_destruction/immeuble.cpp MOTEUR_DESTRUCTION/moteur_destruction/immeuble.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o immeuble.o MOTEUR_DESTRUCTION/moteur_destruction/immeuble.cpp
 
-superstructure.o: MOTEUR_DESTRUCTION/moteur_destruction/superstructure.cpp MOTEUR_DESTRUCTION/moteur_destruction/superstructure.h
+superstructure.o: MOTEUR_DESTRUCTION/moteur_destruction/superstructure.cpp MOTEUR_DESTRUCTION/moteur_destruction/superstructure.h \
+		MOTEUR_DESTRUCTION/moteur_destruction/geometryengine.h \
+		MOTEUR_DESTRUCTION/moteur_destruction/quadtree.h \
+		MOTEUR_DESTRUCTION/moteur_destruction/debris.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o superstructure.o MOTEUR_DESTRUCTION/moteur_destruction/superstructure.cpp
 
 camera.o: MOTEUR_DESTRUCTION/moteur_destruction/camera.cpp MOTEUR_DESTRUCTION/moteur_destruction/camera.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o camera.o MOTEUR_DESTRUCTION/moteur_destruction/camera.cpp
+
+boolet.o: MOTEUR_DESTRUCTION/moteur_destruction/boolet.cpp MOTEUR_DESTRUCTION/moteur_destruction/boolet.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o boolet.o MOTEUR_DESTRUCTION/moteur_destruction/boolet.cpp
 
 mainwidget.o: MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.cpp MOTEUR_DESTRUCTION/moteur_destruction/mainwidget.h \
 		MOTEUR_DESTRUCTION/moteur_destruction/geometryengine.h \

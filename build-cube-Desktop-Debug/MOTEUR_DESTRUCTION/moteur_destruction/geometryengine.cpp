@@ -75,7 +75,7 @@ struct VertexData
 //! [0]
 GeometryEngine::GeometryEngine(float x, float y, float s)
     : indexBuf(QOpenGLBuffer::IndexBuffer),
-      tailleMap(20),
+      tailleMap(100),
       posX(x),
       posY(y),
       RatioX(1),
@@ -124,6 +124,10 @@ void GeometryEngine::fusionDebrisMap(float x, float y, float w, float l, float h
     QString str = "/auto_home/qleroit/MOTEUR_DE_JEUX/build-cube-Desktop-Debug/MOTEUR_DESTRUCTION/moteur_destruction/mapDebris.pgm";
     int p = positionAltitude(x,y);
     int pp = (p + h)*RatioAltitude;
+    if (pp > 255)
+    {
+        pp = 255;
+    }
     fprintf(stderr,"\n %d \n ",pp);
     int xx = x * CarteDebris.width()/tailleMap;
     int yy = y * CarteDebris.height()/tailleMap;
@@ -162,7 +166,7 @@ void GeometryEngine::SauvegardeMapDebris(){
 float GeometryEngine::positionAltitude(float x, float y){
 
     //fprintf(stderr," Jusqu'à la tout va bien \n");
-    float z = qGray(Carte.pixel(x*(Carte.width()-1)/tailleMap,y*(Carte.height()-1)/tailleMap))/RatioAltitude+qGray(CarteDebris.pixel(x*(CarteDebris.width()-1)/tailleMap,y*(CarteDebris.height()-1)/tailleMap))/128.0;
+    float z = qGray(Carte.pixel(x*(Carte.width()-1)/tailleMap,y*(Carte.height()-1)/tailleMap))/*/RatioAltitude*/+qGray(CarteDebris.pixel(x*(CarteDebris.width()-1)/tailleMap,y*(CarteDebris.height()-1)/tailleMap))/*/128.0*/;
     //fprintf(stderr," Je fais le out ici \n");
     return z;
 }
@@ -300,10 +304,10 @@ void constructionVertex(QuadTree Q, VertexData* Vertices, float l, float L, QIma
         float tex2;
         float tex3;
         float tex4;
-        if (qGray(Im2.pixel(Q.X*(Im2.width()-1)/l,Q.Y*(Im2.height()-1)/L))/128.0 > 0
-                || qGray(Im2.pixel((Q.X+Q.longueur)*(Im2.width()-1)/l,Q.Y*(Im2.height()-1)/L))/128.0 > 0
-                || qGray(Im2.pixel(Q.X*(Im2.width()-1)/l,(Q.Y+Q.largeur)*(Im2.height()-1)/L))/128.0 > 0
-                || qGray(Im2.pixel((Q.X+Q.longueur)*(Im2.width()-1)/l,(Q.Y+Q.largeur)*(Im2.height()-1)/L))/128.0 > 0)
+        if (qGray(Im2.pixel(Q.X*(Im2.width()-1)/l,Q.Y*(Im2.height()-1)/L)) > 0
+                || qGray(Im2.pixel((Q.X+Q.longueur)*(Im2.width()-1)/l,Q.Y*(Im2.height()-1)/L)) > 0
+                || qGray(Im2.pixel(Q.X*(Im2.width()-1)/l,(Q.Y+Q.largeur)*(Im2.height()-1)/L)) > 0
+                || qGray(Im2.pixel((Q.X+Q.longueur)*(Im2.width()-1)/l,(Q.Y+Q.largeur)*(Im2.height()-1)/L)) > 0)
         {
             deb = true;
         }

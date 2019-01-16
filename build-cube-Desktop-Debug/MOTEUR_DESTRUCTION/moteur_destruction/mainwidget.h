@@ -81,6 +81,7 @@ typedef struct mesh{
 
 #include "geometryengine.h"
 #include "camera.h"
+#include "boolet.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -125,8 +126,12 @@ protected:
 
     void destroyEverything();
     void drawObj(Mesh* mush,QOpenGLShaderProgram *program);
+    void drawBool(Boolet bowl,QOpenGLShaderProgram *program);
     void applyGravity();
     void destroyOutOfMap();
+    void CreateABowl();
+    void Collide();
+    void destroyStruct(SuperStructure s,float xTar,float yTar,float zTar);
 
     void pivoter();
     void initShaders();
@@ -145,6 +150,7 @@ private:
     QList<SuperStructure*> listStructure;
     QList<Debris*> listDebris;
     QList<Debris*> listDebrisChute;
+    QList<Boolet> Bowls;
     QList<int> listSuppressionDebris;
     Debris *debris;
     QVector<Mesh*> newListDebris = QVector<Mesh*>();

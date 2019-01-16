@@ -1,4 +1,5 @@
 #include "superstructure.h"
+//#include "destructmesh.h"
 
 SuperStructure::SuperStructure(float x, float y, float z, float w, float h, float d, int type, GeometryEngine* geo)
     :indexBuf(QOpenGLBuffer::IndexBuffer),
@@ -16,7 +17,7 @@ SuperStructure::SuperStructure(float x, float y, float z, float w, float h, floa
     // Generate 2 VBOs
     arrayBuf.create();
     indexBuf.create();
-    if (terrain->positionAltitude(X,Y) != Z)
+    if (terrain->positionAltitude(X,Y) != Z && typeStruct == 0)
     {
         Z = terrain->positionAltitude(X,Y);
     }
@@ -27,6 +28,11 @@ SuperStructure::SuperStructure(float x, float y, float z, float w, float h, floa
     if (Y > terrain->tailleMap - Height)
     {
         Y = terrain->tailleMap - Height;
+    }
+    for (int i = 0; i < Depth; i++)
+    {
+        //SuperStructure* A = new SuperStructure(X,Y,Z+i * 1.0f,Width,Height,1.0f, typeStruct+1,terrain);
+        //listStructure.append(A);
     }
     initStruct();
 }
@@ -104,7 +110,6 @@ void SuperStructure::initStruct()
     arrayBuf.allocate(VD,24*sizeof(VertexData));
     indexBuf.bind();
     indexBuf.allocate(indices,36*sizeof(GLushort));
-
 }
 
 void SuperStructure::DrawStructure(QOpenGLShaderProgram *program)

@@ -1,10 +1,3 @@
-#ifndef DESTRUCTMESH_H
-#define DESTRUCTMESH_H
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
 #ifndef MESHSTRUCT
 #define MESHSTRUCT
 
@@ -32,6 +25,13 @@ typedef struct mesh{
 }Mesh;
 
 #endif
+
+#ifndef DESTRUCTMESH_H
+#define DESTRUCTMESH_H
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 Point PointCreator(float x,float y,float z){
     Point newP;
@@ -282,7 +282,7 @@ int indi(int* tab,int n,int size){
     return -1;
 }
 
-int separatePoint(Mesh* mush,Mesh*** meshTab){
+int separatePoint(Mesh* mush,Mesh*** meshTab,float xTar,float yTar,float zTar){
     int* labels = (int*) malloc(sizeof(int)*mush->nbp);
     for(int i=0;i<mush->nbp;i++) labels[i]=-1;
     int lab=0;
@@ -310,13 +310,14 @@ int separatePoint(Mesh* mush,Mesh*** meshTab){
         free(tab);
         //calcNeighbours((*meshTab)[i]);
         calcEnvelopWOLD((*meshTab)[i],mush->cube);
-        float randx = (*meshTab)[i]->cube.x - mush->cube.x;
+        /*float randx = (*meshTab)[i]->cube.x - mush->cube.x;
         float randy = (*meshTab)[i]->cube.y - mush->cube.y;
-        float randz = (*meshTab)[i]->cube.z - mush->cube.z;
+        float randz = (*meshTab)[i]->cube.z - mush->cube.z;*/
         /*float randx = 2.0 * qrand()/RAND_MAX -1.0;
         float randy = 2.0 * qrand()/RAND_MAX -1.0;
         float randz = 2.0 * qrand()/RAND_MAX -1.0;*/
-        giveStrenght((*meshTab)[i],randx,randy,randz);
+        float maxDir = (xTar>yTar && xTar>zTar)?xTar:(yTar>zTar)?yTar:zTar;
+        giveStrenght((*meshTab)[i],xTar,yTar,zTar);
     }
     free(labels);
     return lab;
@@ -330,7 +331,11 @@ bool Collision(Cube a,Cube b, bool rec = true){
     return false;
 }
 
-Mesh** breakMesh(Mesh* mush,float x,float y,float z,int* nbmesh){
+Mesh** breakMesh(Mesh* mush,float xTar,float yTar,float zTar,int* nbmesh){
+    srand(zTar);
+    float x = 1.0*((float)qrand()/RAND_MAX);
+    float y = 1.0*((float)qrand()/RAND_MAX);
+    float z = 1.0*((float)qrand()/RAND_MAX);
     for(int i=0;i<mush->nbl;i++){
         if((mush->tab[mush->links[i][0]].x<x) xor (mush->tab[mush->links[i][1]].x<x)){
             mush->links[i][0]=-1;
@@ -348,7 +353,7 @@ Mesh** breakMesh(Mesh* mush,float x,float y,float z,int* nbmesh){
     cleanLinks(mush);
     calcNeighbours(mush);
     Mesh** meshTab = NULL;
-    *nbmesh = separatePoint(mush,&meshTab);
+    *nbmesh = separatePoint(mush,&meshTab,xTar,yTar,zTar);
     freeMeshComplete(mush);
     return meshTab;
 }

@@ -50,6 +50,7 @@
 
 #include "mainwidget.h"
 #include "destructmesh.h"
+#include "boolet.h"
 #include <QMouseEvent>
 
 #include <math.h>
@@ -120,7 +121,9 @@ void MainWidget::keyPressEvent(QKeyEvent *e)
         case Qt::Key_D:
             destroyEverything();
             break;
-
+        case Qt::Key_R:
+            CreateABowl();
+            break;
         case Qt::Key_Left:
             Dacam.processMovement(Direction::LEFT,0.5f);
             break;
@@ -227,6 +230,8 @@ void MainWidget::timerEvent(QTimerEvent *)
     }
     if(KeyZ_Down)
         Dacam.processMovement(Direction::FORWARD,0.5f);
+
+    //Dacam.position.setZ(geometries->positionAltitude(Dacam.position.x(),Dacam.position.y()));
     update();
 
 }
@@ -266,8 +271,8 @@ void MainWidget::initializeGL()
 //!
     geometries = new GeometryEngine(10.0 *  qrand() / (float) RAND_MAX,10.0 * ((float) qrand()) / (float) RAND_MAX, SCALE);
     ;
-    int I = 5.0f *  qrand() / (float) RAND_MAX + 4;
-    int J = 5.0f *  qrand() / (float) RAND_MAX + 4;
+    int I = 5.0f *  qrand() / (float) RAND_MAX + 20;
+    int J = 5.0f *  qrand() / (float) RAND_MAX + 20;
 
     float ll = 0.0f, LL = 0.0f, taille1 = geometries->tailleMap / I, taille2 = geometries->tailleMap / J;
 
@@ -275,14 +280,14 @@ void MainWidget::initializeGL()
     {
         for (int j = 0; j < J; j++)
         {
-            listStructure.append(new SuperStructure(i * taille1 + ll + 2.0f *  qrand() / (float) RAND_MAX,j * taille2 + LL +  2.0f *  qrand() / (float) RAND_MAX,0.0f,2.0 *  qrand() / (float) RAND_MAX+1.0f,2.0 *  qrand() / (float) RAND_MAX+1.0f,2.0 *  qrand() / (float) RAND_MAX+1.0f,0,geometries));
+            listStructure.append(new SuperStructure(i * taille1 + ll + 2.0f *  qrand() / (float) RAND_MAX,j * taille2 + LL +  2.0f *  qrand() / (float) RAND_MAX,0.0f,2.0 *  qrand() / (float) RAND_MAX+1.0f,2.0 *  qrand() / (float) RAND_MAX+1.0f,5.0 *  qrand() / (float) RAND_MAX+1.0f,0,geometries));
             ll = listStructure[i*J+j]->Width;
             LL = listStructure[i*J+j]->Height;
         }
 
     }
 
-    /*for(int i=0;i<201;i++){
+    /*for(int i=0;i<3000;i++){
         objDestructible.append(fromCubeToTrueMesh(CubeCreator(geometries->tailleMap * qrand()/RAND_MAX, geometries->tailleMap * qrand()/RAND_MAX, (1.0 + 10.0 * qrand()/RAND_MAX)+10,0.5,0.5,0.5),10));
     }*/
 
@@ -324,7 +329,7 @@ void MainWidget::applyGravity(){
 
         for(int i=objDestructible.size()-1;i>=0;i--){
 
-            giveStrenght(daObj[i],0,0,-0.02f);
+            giveStrenght(daObj[i],0,0,-0.05f);
 
             Cube cube = daObj[i]->cube;
 
@@ -354,6 +359,17 @@ void MainWidget::applyGravity(){
             geometries->initMapQuadTree(geometries->posX,geometries->posY);
         }
     }
+    if(Bowls.size()!=0){
+        destroyOutOfMap();
+        int sum = Bowls.size();
+        for(int i=0;i<sum;i++){
+            Boolet daObj = Bowls.takeAt(0);
+            daObj.giveForce(0,0,-0.02f);
+            Cube cube = CubeCreator(daObj.X,daObj.Y,daObj.Z,daObj.Ray,daObj.Ray,daObj.Ray);
+                daObj.applyForce();
+                Bowls.append(daObj);
+        }
+    }
 }
 
 void MainWidget::destroyOutOfMap(){
@@ -376,9 +392,76 @@ void MainWidget::destroyOutOfMap(){
             newListDebris.append(mesh);
         }
     }
+    if(Bowls.size()!=0){
+        int sum = Bowls.size();
+        for(int i=0;i<sum;i++){
+            Boolet daObj = Bowls.takeAt(0);
+            Cube cube = CubeCreator(daObj.X,daObj.Y,daObj.Z,daObj.Ray,daObj.Ray,daObj.Ray);
+            if (!(cube.x<0 || cube.y<0 || cube.x>x || cube.y>y || cube.z<-10))
+            {
+                Bowls.append(daObj);
+            }
+            else{
+                //fprintf(stderr,"%f %f %f",cube.x,cube.y,cube.z);
+            }
+        }
+    }
     for(;newListDebris.size()!=0;){
         objDestructible.append(newListDebris.takeAt(0));
     }
+}
+
+void MainWidget::destroyStruct(SuperStructure strc,float xTar,float yTar,float zTar){
+    for(int i = 0;i<strc.Width;i+=BrickSize){
+        for(int j = 0;j<strc.Height;j+=BrickSize){
+            for(int k = 0;k<strc.Depth;k+=BrickSize){
+                Mesh* mush = fromCubeToTrueMesh(CubeCreator(strc.X+i,strc.Y+j,strc.Z+k+2.0f,BrickSize,BrickSize,BrickSize),10);
+                QVector3D vec = QVector3D(mush->cube.x-xTar,mush->cube.y-yTar,mush->cube.z-zTar);
+                vec.normalize();
+                giveStrenght(mush,vec.x(),vec.y(),vec.z());
+                objDestructible.append(mush);
+            }
+        }
+    }
+}
+
+void MainWidget::Collide(){
+    if(Bowls.size()!=0){
+        int sum = Bowls.size();
+        for(int i=0;i<sum;i++){
+            Boolet daObj = Bowls.takeAt(0);
+            for(int j=0;j<listStructure.size();j++){
+                SuperStructure* obj = listStructure.at(j);
+                if(daObj.collide(obj->X,obj->Y,obj->Z,obj->Width,obj->Height,obj->Depth)){
+                    //fprintf(stderr,"lol\n");
+                    destroyStruct(*obj,daObj.X,daObj.Y,daObj.Z);
+                }
+            }
+            /*for(int j=0;j<objDestructible.size();j++){
+                if(daObj.collide(objDestructible.at(j)->cube.x,objDestructible.at(j)->cube.y,objDestructible.at(j)->cube.z,objDestructible.at(j)->cube.sizeX,objDestructible.at(j)->cube.sizeY,objDestructible.at(j)->cube.sizeZ)){
+                    fprintf(stderr,"trolol %d\n",objDestructible.size());
+                    QVector<Mesh*> newListDebris = QVector<Mesh*>();
+                        int nbmesh=0;
+                        Mesh** meshTab = breakMesh(objDestructible.takeAt(j),daObj.X,daObj.Y,daObj.Z,&nbmesh);
+                        for(int i=0;i<nbmesh;i++){
+                            newListDebris.append(meshTab[i]);
+                        }
+                        free(meshTab);
+                        j--;
+                    for(;newListDebris.size()!=0;){
+                        objDestructible.append(newListDebris.takeAt(0));
+                    }
+                }
+            }*/
+            Bowls.append(daObj);
+        }
+    }
+}
+
+void MainWidget::CreateABowl(){
+    Boolet bowl = Boolet(Dacam.position.x(),Dacam.position.y(),Dacam.position.z(),2);
+    bowl.giveForce(Dacam.front.x(),Dacam.front.y(),0);
+    Bowls.append(bowl);
 }
 
 struct VertexData
@@ -388,6 +471,80 @@ struct VertexData
     QVector4D normal;
 
 };
+
+void MainWidget::drawBool(Boolet bowl,QOpenGLShaderProgram *program)
+{
+    QOpenGLBuffer arrayBuf;
+    QOpenGLBuffer indexBuf(QOpenGLBuffer::IndexBuffer);
+    arrayBuf.create();
+    indexBuf.create();
+    Cube cube = CubeCreator(bowl.X-bowl.Ray/2,bowl.Y-bowl.Ray/2,bowl.Z-bowl.Ray/2,bowl.Ray,bowl.Ray,bowl.Ray);
+    VertexData* VD = (VertexData*) malloc(sizeof(VertexData)*24);
+    //////Face 1 Devant
+    VD[0]={QVector3D(cube.x,cube.y,cube.z), QVector2D(0.0f, 0.0f)};
+    VD[1]={QVector3D(cube.x+cube.sizeX,cube.y,cube.z), QVector2D(0.0f, 0.0f)};
+    VD[2]={QVector3D(cube.x+cube.sizeX,cube.y+cube.sizeY,cube.z), QVector2D(0.0f, 0.0f)};
+    VD[3]={QVector3D(cube.x,cube.y+cube.sizeY,cube.z), QVector2D(0.0f, 0.0f)};
+    //////Face Dessus
+    VD[4]={QVector3D(cube.x,cube.y,cube.z), QVector2D(0.0f, 0.0f)};
+    VD[5]={QVector3D(cube.x,cube.y,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    VD[6]={QVector3D(cube.x+cube.sizeX,cube.y,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    VD[7]={QVector3D(cube.x+cube.sizeX,cube.y,cube.z), QVector2D(0.0f, 0.0f)};
+    //////Face Derrière
+    VD[8]={QVector3D(cube.x,cube.y,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    VD[9]={QVector3D(cube.x,cube.y+cube.sizeY,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    VD[10]={QVector3D(cube.x+cube.sizeX,cube.y+cube.sizeY,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    VD[11]={QVector3D(cube.x+cube.sizeX,cube.y,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    //////Face Dessous
+    VD[12]={QVector3D(cube.x,cube.y+cube.sizeY,cube.z), QVector2D(0.0f, 0.0f)};
+    VD[13]={QVector3D(cube.x+cube.sizeX,cube.y+cube.sizeY,cube.z), QVector2D(0.0f, 0.0f)};
+    VD[14]={QVector3D(cube.x+cube.sizeX,cube.y+cube.sizeY,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    VD[15]={QVector3D(cube.x,cube.y+cube.sizeY,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    //////Face Gauche
+    VD[16]={QVector3D(cube.x,cube.y,cube.z), QVector2D(0.0f, 0.0f)};
+    VD[17]={QVector3D(cube.x,cube.y+cube.sizeY,cube.z), QVector2D(0.0f, 0.0f)};
+    VD[18]={QVector3D(cube.x,cube.y+cube.sizeY,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    VD[19]={QVector3D(cube.x,cube.y,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    //////Face Droite
+    VD[20]={QVector3D(cube.x+cube.sizeX,cube.y,cube.z), QVector2D(0.0f, 0.0f)};
+    VD[21]={QVector3D(cube.x+cube.sizeX,cube.y,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    VD[22]={QVector3D(cube.x+cube.sizeX,cube.y+cube.sizeY,cube.z+cube.sizeZ), QVector2D(0.0f, 0.0f)};
+    VD[23]={QVector3D(cube.x+cube.sizeX,cube.y+cube.sizeY,cube.z), QVector2D(0.0f, 0.0f)};
+
+    GLushort indices[36];
+    for(int i=0,j=0;i<36;i+=6,j+=4){
+        indices[i] = j;
+        indices[i+1] = j+1;
+        indices[i+2] = j+2;
+        indices[i+3] = j+2;
+        indices[i+4] = j+3;
+        indices[i+5] = j;
+    }
+    arrayBuf.bind();
+    arrayBuf.allocate(VD,24*sizeof(VertexData));
+    indexBuf.bind();
+    indexBuf.allocate(indices,36*sizeof(GLushort));
+
+    // Offset for position
+    quintptr offset = 0;
+
+    // Tell OpenGL programmable pipeline how to locate vertex position data
+    int vertexLocation = program->attributeLocation("a_position");
+    program->enableAttributeArray(vertexLocation);
+    program->setAttributeBuffer(vertexLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
+
+    // Offset for texture coordinate
+    offset += sizeof(QVector3D);
+
+    // Tell OpenGL programmable pipeline how to locate vertex texture coordinate data
+    int texcoordLocation = program->attributeLocation("a_texcoord");
+    program->enableAttributeArray(texcoordLocation);
+    program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
+
+    // Draw cube geometry using indices from VBO 1
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+    free(VD);
+}
 
 void MainWidget::drawObj(Mesh* mush,QOpenGLShaderProgram *program)
 {
@@ -594,7 +751,8 @@ void MainWidget::paintGL()
     // Use texture unit 0 which contains cube.png
     program.setUniformValue("texture", 0);
     geometries->drawQuadPlaneGeometry(&program);
-
+    applyGravity();
+    Collide();
     if (listStructure.size() != 0)
     {
         for (int i = 0; i < listStructure.size(); i++)
@@ -605,21 +763,20 @@ void MainWidget::paintGL()
 
     if (objDestructible.size() != 0)
     {
-        applyGravity();
         //Mesh** daObj = objDestructible.data();
             for(int i=0;i<objDestructible.size();i++){
-                //drawObj(daObj[i],&program);
                 drawObj(objDestructible[i],&program);
             }
             for(int i=0;i<newListDebrisSol.size();i++){
-                //drawObj(daObj[i],&program);
                 drawObj(newListDebrisSol[i],&program);
             }
     }
-
+    for(int i=0;i<Bowls.size();i++){
+        drawBool(Bowls[i],&program);
+    }
     TimeFin = clock();
 
     temps = (float)(TimeFin-TimeDebut)/CLOCKS_PER_SEC;
-    fprintf(stderr,"temps : %f", 1.0f/temps);
+    //fprintf(stderr,"temps : %f", 1.0f/temps);
 }
 

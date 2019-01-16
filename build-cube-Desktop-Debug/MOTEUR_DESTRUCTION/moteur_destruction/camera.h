@@ -30,14 +30,15 @@ public:
     QVector3D getPosition();
     void ApplyGravity(float gravityForce);
 
+    QVector3D position;
+    QVector3D front;
+
 protected:
     void updateVectors();
 
 private:
-    QVector3D position;
     float pitch;
     float yaw;
-    QVector3D front;
     QVector3D right;
     QVector3D up;
     float mouseSensitivity;

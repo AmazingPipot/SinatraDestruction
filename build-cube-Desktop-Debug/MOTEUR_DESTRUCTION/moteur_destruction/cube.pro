@@ -9,7 +9,8 @@ SOURCES += main.cpp \
     gestionbatiment.cpp \
     immeuble.cpp \
     superstructure.cpp \
-    camera.cpp
+    camera.cpp \
+    boolet.cpp
 
 SOURCES += \
     mainwidget.cpp \
@@ -24,7 +25,8 @@ HEADERS += \
     immeuble.h \
     destructmesh.h \
     superstructure.h \
-    camera.h
+    camera.h \
+    boolet.h
 
 RESOURCES += \
     shaders.qrc \
